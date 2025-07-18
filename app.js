@@ -1589,15 +1589,32 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (uploadCoursesBtn) {
         uploadCoursesBtn.addEventListener('click', async () => {
             const uploadStatusEl = document.getElementById('upload-status');
-            uploadStatusEl.textContent = 'Uploading...';
-            try {
-                await uploadCourses();
-                uploadStatusEl.textContent = 'Courses uploaded successfully!';
-                uploadStatusEl.style.color = 'green';
-            } catch (error) {
-                uploadStatusEl.textContent = `Error: ${error.message}`;
+            const fileInput = document.getElementById('json-file-input');
+
+            if (fileInput.files.length === 0) {
+                uploadStatusEl.textContent = 'Please select a JSON file to upload.';
                 uploadStatusEl.style.color = 'var(--mit-red)';
+                return;
             }
+
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+
+            reader.onload = async (event) => {
+                try {
+                    const coursesData = JSON.parse(event.target.result);
+                    uploadStatusEl.textContent = 'Uploading...';
+                    await uploadCourses(coursesData);
+                    uploadStatusEl.textContent = 'Courses uploaded successfully!';
+                    uploadStatusEl.style.color = 'green';
+                } catch (error) {
+                    console.error('Error parsing or uploading file:', error);
+                    uploadStatusEl.textContent = `Error: ${error.message}`;
+                    uploadStatusEl.style.color = 'var(--mit-red)';
+                }
+            };
+
+            reader.readAsText(file);
         });
     }
 

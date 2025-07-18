@@ -1,0 +1,246 @@
+[
+  {
+    "title": "Diploma in Public Health",
+    "program": "Public Health",
+    "code": "DPH",
+    "description": "This diploma program provides a comprehensive foundation in public health, covering core concepts such as epidemiology, biostatistics, and health policy.",
+    "creditHours": 27,
+    "modules": [
+      {
+        "code": "DPH101",
+        "title": "Introduction to Public Health",
+        "description": "An overview of the history, principles, and practice of public health.",
+        "creditHours": 3,
+        "sections": [
+          {
+            "sectionId": "sec_1",
+            "title": "Course Materials",
+            "order": 1,
+            "content": [
+              {
+                "type": "pdf",
+                "title": "Introduction to Public Health PDF",
+                "url": "https://www.cdc.gov/training-publichealth101/media/pdfs/introduction-to-public-health.pdf"
+              },
+              {
+                "type": "video",
+                "title": "What Is Public Health?",
+                "url": "https://www.youtube.com/watch?v=-dmJSLNgjxo"
+              },
+              {
+                "type": "video",
+                "title": "The 10 Essential Public Health Services",
+                "url": "https://www.youtube.com/watch?v=HAnw168huqA"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "code": "DPH102",
+        "title": "Epidemiology Basics",
+        "description": "Fundamental concepts of epidemiology, including disease surveillance and investigation.",
+        "creditHours": 3,
+        "sections": [
+          {
+            "sectionId": "sec_1",
+            "title": "Course Materials",
+            "order": 1,
+            "content": [
+              {
+                "type": "pdf",
+                "title": "Introduction to Epidemiology PDF",
+                "url": "https://www.cdc.gov/training-publichealth101/media/pdfs/introduction-to-epidemiology.pdf"
+              },
+              {
+                "type": "video",
+                "title": "What is Epidemiology?",
+                "url": "https://www.youtube.com/watch?v=_luU3I03JwE"
+              },
+              {
+                "type": "video",
+                "title": "Introduction to Epidemiology",
+                "url": "https://www.youtube.com/watch?v=5-7bcnNcJkY"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "code": "DPH103",
+        "title": "Public Health Surveillance",
+        "description": "The principles and practices of public health surveillance.",
+        "creditHours": 3,
+        "sections": [
+          {
+            "sectionId": "sec_1",
+            "title": "Course Materials",
+            "order": 1,
+            "content": [
+              {
+                "type": "pdf",
+                "title": "Introduction to Surveillance PDF",
+                "url": "https://www.cdc.gov/training-publichealth101/media/pdfs/introduction-to-surveillance.pdf"
+              },
+              {
+                "type": "video",
+                "title": "Public Health Surveillance",
+                "url": "https://www.youtube.com/watch?v=kATQimRXcs4"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "code": "DPH104",
+        "title": "Environmental & Occupational Health",
+        "description": "The study of environmental and occupational factors that affect health.",
+        "creditHours": 3,
+        "sections": [
+          {
+            "sectionId": "sec_1",
+            "title": "Course Materials",
+            "order": 1,
+            "content": [
+              {
+                "type": "pdf",
+                "title": "Environmental Public Health Standards PDF",
+                "url": "https://www.cdc.gov/vessel-sanitation/media/pdfs/2025/06/2025_VSP_Environmental_Public_Health_Standards-508.pdf"
+              },
+              {
+                "type": "video",
+                "title": "Environmental and Occupational Health",
+                "url": "https://www.youtube.com/watch?v=rWKVOvhEutE"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "code": "DPH105",
+        "title": "Public Health Informatics",
+        "description": "The application of informatics in public health.",
+        "creditHours": 3,
+        "sections": [
+          {
+            "sectionId": "sec_1",
+            "title": "Course Materials",
+            "order": 1,
+            "content": [
+              {
+                "type": "pdf",
+                "title": "Introduction to Public Health Informatics PDF",
+                "url": "https://www.cdc.gov/training-publichealth101/media/pdfs/introduction-to-public-health-informatics.pdf"
+              },
+              {
+                "type": "video",
+                "title": "What is Public Health Informatics?",
+                "url": "https://www.youtube.com/watch?v=Fzc3j8QG_Mw"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "code": "DPH201",
+        "title": "Public Health Law and Ethics",
+        "description": "Legal and ethical issues in public health.",
+        "creditHours": 3,
+        "sections": [
+          {
+            "sectionId": "sec_1",
+            "title": "Course Materials",
+            "order": 1,
+            "content": [
+              {
+                "type": "pdf",
+                "title": "An Introduction to Public Health Law PDF",
+                "url": "https://www.cdc.gov/phlp/docs/An-Introduction-to-Public-Health-Law-Instructors-Guide.pdf"
+              },
+              {
+                "type": "video",
+                "title": "Public Health Law and Ethics",
+                "url": "https://www.youtube.com/watch?v=XYoSzT6DerM"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "code": "DPH202",
+        "title": "Public Health Laboratories",
+        "description": "The role of laboratories in public health.",
+        "creditHours": 3,
+        "sections": [
+          {
+            "sectionId": "sec_1",
+            "title": "Course Materials",
+            "order": 1,
+            "content": [
+              {
+                "type": "pdf",
+                "title": "Introduction to Public Health Laboratories PDF",
+                "url": "https://www.cdc.gov/training-publichealth101/media/pdfs/introduction-to-public-health-laboratories.pdf"
+              },
+              {
+                "type": "video",
+                "title": "The Role of Public Health Laboratories",
+                "url": "https://www.youtube.com/watch?v=O4udg3W8jT4"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "code": "DPH203",
+        "title": "Nutrition and Public Health",
+        "description": "The relationship between nutrition and public health.",
+        "creditHours": 3,
+        "sections": [
+          {
+            "sectionId": "sec_1",
+            "title": "Course Materials",
+            "order": 1,
+            "content": [
+              {
+                "type": "pdf",
+                "title": "Nutrition Road Map PDF",
+                "url": "https://www.cdc.gov/nutrition/downloads/nutrition-road-map-508.pdf"
+              },
+              {
+                "type": "video",
+                "title": "Nutrition and Public Health",
+                "url": "https://www.youtube.com/watch?v=tf5_Jp8y55s"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "code": "DPH204",
+        "title": "Maternal and Child Health",
+        "description": "An overview of maternal and child health issues.",
+        "creditHours": 3,
+        "sections": [
+          {
+            "sectionId": "sec_1",
+            "title": "Course Materials",
+            "order": 1,
+            "content": [
+              {
+                "type": "pdf",
+                "title": "Maternal Health Snapshot PDF",
+                "url": "https://www.cdc.gov/reproductivehealth/maternalinfanthealth/pdf/Maternal_Health_Snapshot.pdf"
+              },
+              {
+                "type": "video",
+                "title": "Maternal and Child Health",
+                "url": "https://www.youtube.com/watch?v=1KjScylgg3o"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]

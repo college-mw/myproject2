@@ -1,0 +1,19 @@
+{
+  "title": "Introduction to Artificial Intelligence",
+  "code": "CS401",
+  "description": "This course provides a comprehensive introduction to the field of Artificial Intelligence.",
+  "creditHours": 3,
+  "modules": [
+    {
+      "moduleId": "module-1",
+      "title": "Introduction to AI",
+      "content": "History and foundations of AI."
+    },
+    {
+      "moduleId": "module-2",
+      "title": "Search Algorithms",
+      "content": "Uninformed and informed search strategies."
+    }
+  ],
+  "academicTermId": "term1"
+}

@@ -5,30 +5,30 @@
 import { auth, db } from './firebase-config.js';
 
 // Import Firebase functions for authentication, database, and storage
-import { 
-    createUserWithEmailAndPassword, 
-    signInWithEmailAndPassword, 
-    signOut, 
-    onAuthStateChanged 
+import {
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword,
+    signOut,
+    onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
-import { 
-    ref, 
-    set, 
-    get, 
-    child, 
+import {
+    ref,
+    set,
+    get,
+    child,
     onValue,
     update,
-    push, 
-    orderByChild, 
+    push,
+    orderByChild,
     query,
-    limitToLast, 
-    onChildAdded 
+    limitToLast,
+    onChildAdded
 } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
-import { 
-    getStorage, 
-    ref as storageRef, 
-    uploadBytes, 
-    getDownloadURL 
+import {
+    getStorage,
+    ref as storageRef,
+    uploadBytes,
+    getDownloadURL
 } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-storage.js";
 
 // Import functions to populate sample data if the database is empty
@@ -37,14 +37,14 @@ import { addSampleCourses, addSampleAnnouncements, addSampleAcademicTerms } from
 // --- Global DOM Element variables ---
 let loginForm, signupForm, logoutButton, loginLogoutNav, authSection, authError, welcomeMessage;
 let mainContentPages = {};
-let storage; 
+let storage;
 
 // --- CORE HELPER & AUTH FUNCTIONS ---
 
 /**
  * Handles user logout.
  */
-function handleLogout() { 
+function handleLogout() {
     console.log("handleLogout: CALLED");
     signOut(auth).then(() => {
         console.log('User logged out successfully via handleLogout');
@@ -61,7 +61,7 @@ function handleLogout() {
  * @returns {Promise<string|null>} A promise that resolves with the download URL of the uploaded file, or null if the upload fails.
  */
 async function uploadFileToStorage(file, path) {
-    if (!file || !storage) { 
+    if (!file || !storage) {
         console.warn("uploadFileToStorage: File or storage service not available.", {filePresent: !!file, storageExists: !!storage});
         return null;
     }
@@ -73,7 +73,7 @@ async function uploadFileToStorage(file, path) {
         return downloadURL;
     } catch (error) {
         console.error(`Error uploading file to ${path}:`, error);
-        throw error; 
+        throw error;
     }
 }
 
@@ -81,11 +81,11 @@ async function uploadFileToStorage(file, path) {
  * Shows the authentication section (login/signup forms).
  * @param {Event} e The event object.
  */
-function showAuthSection(e){ 
+function showAuthSection(e){
     console.log("showAuthSection: CALLED");
     if(e) e.preventDefault();
     if (authSection) authSection.classList.remove('hidden');
-    if (welcomeMessage) welcomeMessage.classList.add('hidden'); 
+    if (welcomeMessage) welcomeMessage.classList.add('hidden');
     if (mainContentPages.home && (window.location.pathname.endsWith('index.html') || window.location.pathname.endsWith('/'))) {
         const coursesContainer = document.getElementById('courses-container');
         if (coursesContainer) coursesContainer.innerHTML = '<p>Log in to see available courses.</p>'; 
@@ -103,7 +103,7 @@ function clearProfilePageData() {
         'user-address-zip', 'user-address-country', 'user-prev-education',
         'user-degree', 'user-major', 'user-minor', 'user-emergency-name',
         'user-emergency-relationship', 'user-emergency-phone', 'user-terms-accepted',
-        'user-fees-balance' 
+        'user-fees-balance'
     ];
     profileFieldsIds.forEach(id => {
         const el = document.getElementById(id);
@@ -111,12 +111,12 @@ function clearProfilePageData() {
     });
     const profilePicEl = document.getElementById('profile-picture');
     if (profilePicEl) {
-        profilePicEl.src = '#'; 
-        profilePicEl.style.display = 'block'; 
+        profilePicEl.src = '#';
+        profilePicEl.style.display = 'block';
     }
     const transcriptsLink = document.getElementById('user-transcripts-link');
     const transcriptsNA = document.getElementById('user-transcripts-na');
-    if (transcriptsLink && transcriptsNA) { 
+    if (transcriptsLink && transcriptsNA) {
         transcriptsLink.classList.add('hidden');
         transcriptsNA.classList.remove('hidden');
         transcriptsNA.textContent = 'N/A';
@@ -129,26 +129,26 @@ function clearProfilePageData() {
  * Updates the UI for a logged-in user.
  * @param {User} user The user object from Firebase Auth.
  */
-function updateUIForLoggedInUser(user) { 
-    console.log("--- updateUIForLoggedInUser: ENTERED for user:", user?.uid); 
-    if (loginLogoutNav) { 
+function updateUIForLoggedInUser(user) {
+    console.log("--- updateUIForLoggedInUser: ENTERED for user:", user?.uid);
+    if (loginLogoutNav) {
         loginLogoutNav.textContent = 'Logout';
-        loginLogoutNav.removeEventListener('click', showAuthSection); 
-        loginLogoutNav.addEventListener('click', (e) => { 
+        loginLogoutNav.removeEventListener('click', showAuthSection);
+        loginLogoutNav.addEventListener('click', (e) => {
             console.log("Logout link in NAV clicked");
             e.preventDefault();
-            handleLogout(); 
+            handleLogout();
         });
     }
-    if (authSection) authSection.classList.add('hidden');  
+    if (authSection) authSection.classList.add('hidden');
 
     if (welcomeMessage && (window.location.pathname.endsWith('index.html') || window.location.pathname.endsWith('/'))) {
         welcomeMessage.classList.remove('hidden');
         const h1 = welcomeMessage.querySelector('h1');
-        if(h1 && user.displayName) h1.textContent = `Welcome, ${user.displayName}!`; 
+        if(h1 && user.displayName) h1.textContent = `Welcome, ${user.displayName}!`;
         else if(h1) h1.textContent = `Welcome!`;
     }
-    
+
     Object.values(mainContentPages).forEach(pageEl => {
         if (pageEl) pageEl.classList.add('hidden');
     });
@@ -162,15 +162,15 @@ function updateUIForLoggedInUser(user) {
     const profileNavLink = document.getElementById('profile-nav-link');
     if(profileNavLink) profileNavLink.classList.remove('hidden');
 }
-    
+
 /**
  * Updates the UI for a logged-out user.
  */
-function updateUIForLoggedOutUser() { 
-    console.log("updateUIForLoggedOutUser: CALLED"); 
-    if (loginLogoutNav) { 
+function updateUIForLoggedOutUser() {
+    console.log("updateUIForLoggedOutUser: CALLED");
+    if (loginLogoutNav) {
         loginLogoutNav.textContent = 'Login';
-        loginLogoutNav.removeEventListener('click', handleLogout); 
+        loginLogoutNav.removeEventListener('click', handleLogout);
         if (typeof showAuthSection === 'function') {
             loginLogoutNav.addEventListener('click', showAuthSection);
         } else {
@@ -189,13 +189,13 @@ function updateUIForLoggedOutUser() {
 
     const currentPage = window.location.pathname.split("/").pop();
     const protectedPages = ['dashboard.html', 'profile.html', 'course.html', 'admin.html', 'chat.html'];
-    
+
     if (protectedPages.includes(currentPage)) {
         console.log(`updateUIForLoggedOutUser: On protected page ${currentPage}, redirecting to index.html`);
-        window.location.href = 'index.html'; 
+        window.location.href = 'index.html';
     } else if (currentPage === 'index.html' || currentPage === '') {
-        if (authSection) authSection.classList.remove('hidden'); 
-        if (welcomeMessage) welcomeMessage.classList.add('hidden'); 
+        if (authSection) authSection.classList.remove('hidden');
+        if (welcomeMessage) welcomeMessage.classList.add('hidden');
         if (mainContentPages.home) mainContentPages.home.classList.remove('hidden');
         const coursesContainer = document.getElementById('courses-container');
         if (coursesContainer) coursesContainer.innerHTML = '<p>Please log in or sign up to see courses.</p>';
@@ -221,10 +221,10 @@ function initializeAdminPageLogic(adminUser, adminUserData) {
     console.log("Initializing Admin Page Logic for user:", adminUser.uid);
     const createCourseForm = document.getElementById('create-course-form');
     const createCourseMessageEl = document.getElementById('create-course-message');
-    const courseCreationTermSelectEl = document.getElementById('course-creation-term-select'); 
+    const courseCreationTermSelectEl = document.getElementById('course-creation-term-select');
 
     if (createCourseForm) {
-        createCourseForm.addEventListener('submit', async (ev) => { 
+        createCourseForm.addEventListener('submit', async (ev) => {
             ev.preventDefault(); if(createCourseMessageEl) createCourseMessageEl.textContent = '';
             const data = {
                 title: document.getElementById('course-title-input').value,
@@ -240,11 +240,11 @@ function initializeAdminPageLogic(adminUser, adminUserData) {
             }
             const modules = data.moduleTitlesRaw.split('\n').filter(t => t.trim() !== '').map((title, i) => ({ moduleId: `module-${i}`, title: title, content: "" }));
             const newCourseRef = push(ref(db, 'courses'));
-            const newCourseData = { 
+            const newCourseData = {
                 title: data.title, code: data.code, description: data.description, creditHours: data.creditHours, modules: modules, academicTermId: data.academicTermId,
-                instructor: "", department: "", level: "", term: "", exams: {}, assignments: {}, createdAt: Date.now(), createdBy: adminUser.uid 
+                instructor: "", department: "", level: "", term: "", exams: {}, assignments: {}, createdAt: Date.now(), createdBy: adminUser.uid
             };
-            delete newCourseData.moduleTitlesRaw; 
+            delete newCourseData.moduleTitlesRaw;
             try {
                 await set(newCourseRef, newCourseData);
                 if(createCourseMessageEl) { createCourseMessageEl.textContent = 'Course created!'; createCourseMessageEl.style.color = 'green';}
@@ -263,8 +263,8 @@ function initializeAdminPageLogic(adminUser, adminUserData) {
             return;
         }
         existingTermsListEl.innerHTML = '<li>Loading terms...</li>';
-        courseCreationTermSelectEl.innerHTML = '<option value="">Loading Terms...</option>'; 
-        
+        courseCreationTermSelectEl.innerHTML = '<option value="">Loading Terms...</option>';
+
         try {
             const termsSnapshot = await get(query(ref(db, 'academicTerms'), orderByChild('startDate')));
             existingTermsListEl.innerHTML = '';
@@ -320,14 +320,14 @@ function initializeAdminPageLogic(adminUser, adminUserData) {
                 await push(ref(db, 'academicTerms'), termData);
                 if(termCreateStatusEl) {termCreateStatusEl.textContent = "Academic term created successfully!"; termCreateStatusEl.style.color = 'green';}
                 createTermForm.reset();
-                displayExistingTerms(); 
+                displayExistingTerms();
             } catch (error) {
                 console.error("Error creating academic term:", error);
                 if(termCreateStatusEl) {termCreateStatusEl.textContent = `Error: ${error.message}`; termCreateStatusEl.style.color = 'var(--mit-red)';}
             }
         });
     }
-    if(existingTermsListEl && courseCreationTermSelectEl) displayExistingTerms(); 
+    if(existingTermsListEl && courseCreationTermSelectEl) displayExistingTerms();
 
     const adminUserSelect = document.getElementById('admin-user-select');
     const adminSelectedUserDetailsDiv = document.getElementById('admin-selected-user-details');
@@ -338,27 +338,27 @@ function initializeAdminPageLogic(adminUser, adminUserData) {
     const adminUpdateFeesBtn = document.getElementById('admin-update-fees-btn');
     const adminUpdateFeesMessageEl = document.getElementById('admin-update-fees-message');
     const adminPendingEnrollmentsDiv = document.getElementById('admin-pending-enrollments');
-    let allUsersData = {}; 
+    let allUsersData = {};
 
-    async function loadAllUsersForAdmin() { 
+    async function loadAllUsersForAdmin() {
         if (!adminUserSelect) return;
         adminUserSelect.innerHTML = '<option value="">Loading...</option>';
         try {
             const usersSnapshot = await get(ref(db, 'users'));
             allUsersData = usersSnapshot.val();
             adminUserSelect.innerHTML = '<option value="">-- Select User --</option>';
-            if (allUsersData) for (const userId_iter in allUsersData) { 
+            if (allUsersData) for (const userId_iter in allUsersData) {
                 const u = allUsersData[userId_iter];
                 const opt = document.createElement('option'); opt.value = userId_iter;
                 opt.textContent = `${u.displayName} (${u.email})`; adminUserSelect.appendChild(opt);
             } else adminUserSelect.innerHTML = '<option value="">No users.</option>';
         } catch (e) { console.error("Error loading users for admin:", e); adminUserSelect.innerHTML = '<option value="">Error.</option>';}
     }
-    async function displayUserDetailsForAdmin(userId) { 
+    async function displayUserDetailsForAdmin(userId) {
         if (!adminSelectedUserDetailsDiv || !userId || !allUsersData[userId]) {
             if(adminSelectedUserDetailsDiv) adminSelectedUserDetailsDiv.classList.add('hidden'); return;
         }
-        const selectedUserData = allUsersData[userId]; 
+        const selectedUserData = allUsersData[userId];
         if(adminSelectedUserNameEl) adminSelectedUserNameEl.textContent = `Managing: ${selectedUserData.displayName}`;
         if(adminSelectedUserFeesEl) adminSelectedUserFeesEl.textContent = selectedUserData.feesBalance ? `${selectedUserData.feesBalance.currency} ${selectedUserData.feesBalance.amount.toLocaleString()}` : 'N/A';
         if(adminNewFeesAmountInput) adminNewFeesAmountInput.value = selectedUserData.feesBalance?.amount || '';
@@ -383,10 +383,10 @@ function initializeAdminPageLogic(adminUser, adminUserData) {
         }
         if(adminSelectedUserDetailsDiv) adminSelectedUserDetailsDiv.classList.remove('hidden');
     }
-    if(adminUserSelect) adminUserSelect.addEventListener('change', () => { 
+    if(adminUserSelect) adminUserSelect.addEventListener('change', () => {
         const uid = adminUserSelect.value; uid ? displayUserDetailsForAdmin(uid) : adminSelectedUserDetailsDiv.classList.add('hidden');
     });
-    if(adminUpdateFeesBtn) adminUpdateFeesBtn.addEventListener('click', async () => { 
+    if(adminUpdateFeesBtn) adminUpdateFeesBtn.addEventListener('click', async () => {
         const uid = adminUserSelect.value; if (!uid) { if(adminUpdateFeesMessageEl) adminUpdateFeesMessageEl.textContent = "Select user."; return; }
         const amt = parseFloat(adminNewFeesAmountInput.value); const cur = adminNewFeesCurrencyInput.value || "MWK";
         if (isNaN(amt)) { if(adminUpdateFeesMessageEl) adminUpdateFeesMessageEl.textContent = "Valid amount needed."; return; }
@@ -397,27 +397,27 @@ function initializeAdminPageLogic(adminUser, adminUserData) {
             if(allUsersData[uid]) allUsersData[uid].feesBalance = { amount: amt, currency: cur };
         } catch (e) { console.error("Error updating fees:", e); if(adminUpdateFeesMessageEl){ adminUpdateFeesMessageEl.textContent = `Error: ${e.message}`; adminUpdateFeesMessageEl.style.color = 'var(--mit-red)';}}
     });
-    
+
     const platformUpdateForm = document.getElementById('platform-update-form');
     const platformUpdateMessageInput = document.getElementById('platform-update-message');
     const platformUpdateStatusEl = document.getElementById('platform-update-status');
-    if (platformUpdateForm && platformUpdateMessageInput && platformUpdateStatusEl) { 
+    if (platformUpdateForm && platformUpdateMessageInput && platformUpdateStatusEl) {
         platformUpdateForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const message = platformUpdateMessageInput.value.trim();
             if (!message) { platformUpdateStatusEl.textContent = "Message empty."; platformUpdateStatusEl.style.color = 'var(--mit-red)'; return; }
-            const currentUser = auth.currentUser; 
+            const currentUser = auth.currentUser;
             if (!currentUser) { platformUpdateStatusEl.textContent = "Not authenticated."; platformUpdateStatusEl.style.color = 'var(--mit-red)'; return; }
-            let authorDisplayName = adminUserData?.displayName || "Admin"; 
+            let authorDisplayName = adminUserData?.displayName || "Admin";
             const announcementData = { message, timestamp: Date.now(), postedBy: currentUser.uid, authorName: authorDisplayName };
             try {
-                await push(ref(db, 'platformAnnouncements'), announcementData); 
+                await push(ref(db, 'platformAnnouncements'), announcementData);
                 platformUpdateStatusEl.textContent = "Update posted!"; platformUpdateStatusEl.style.color = 'green';
-                platformUpdateMessageInput.value = ''; 
+                platformUpdateMessageInput.value = '';
             } catch (error) { console.error("Error posting platform update:", error); platformUpdateStatusEl.textContent = `Error: ${error.message}`; platformUpdateStatusEl.style.color = 'var(--mit-red)';}
         });
     }
-    loadAllUsersForAdmin(); 
+    loadAllUsersForAdmin();
 
     // --- Course Content Management Logic ---
     const adminCourseSelect = document.getElementById('admin-course-select');
@@ -472,7 +472,7 @@ function initializeAdminPageLogic(adminUser, adminUserData) {
                 const sectionEl = document.createElement('div');
                 sectionEl.classList.add('admin-section-container');
                 sectionEl.style.cssText = 'background-color: #fff; padding: 15px; border: 1px solid #ddd; margin-bottom: 15px; border-radius: 4px;';
-                
+
                 const sectionTitle = document.createElement('h5');
                 sectionTitle.textContent = section.title;
                 sectionEl.appendChild(sectionTitle);
@@ -499,11 +499,11 @@ function initializeAdminPageLogic(adminUser, adminUserData) {
                 const contentFormsContainer = document.createElement('div');
                 contentFormsContainer.classList.add('content-forms-container');
                 contentFormsContainer.style.marginTop = '15px';
-                
+
                 const videoForm = document.getElementById('add-video-form-template').cloneNode(true);
                 const pdfForm = document.getElementById('add-pdf-form-template').cloneNode(true);
                 const moduleForm = document.getElementById('add-module-form-template').cloneNode(true);
-                
+
                 contentFormsContainer.appendChild(videoForm);
                 contentFormsContainer.appendChild(pdfForm);
                 contentFormsContainer.appendChild(moduleForm);
@@ -526,7 +526,7 @@ function initializeAdminPageLogic(adminUser, adminUserData) {
         const form = button.closest('.add-content-form');
         const contentType = button.dataset.type;
         const sectionEl = form.closest('.admin-section-container');
-        
+
         // Find the index of the section
         const sectionsInDOM = Array.from(courseSectionsContainer.querySelectorAll('.admin-section-container'));
         const sectionIndex = sectionsInDOM.indexOf(sectionEl);
@@ -566,7 +566,7 @@ function initializeAdminPageLogic(adminUser, adminUserData) {
             const snapshot = await get(courseRef);
             const courseData = snapshot.val();
             const sections = courseData.sections || [];
-            
+
             if (!sections[sectionIndex].content) {
                 sections[sectionIndex].content = [];
             }
@@ -612,7 +612,7 @@ function initializeAdminPageLogic(adminUser, adminUserData) {
                 try {
                     await set(courseRef, null); // In RTDB, setting to null deletes the data
                     alert(`Course "${courseTitle}" has been deleted.`);
-                    
+
                     // Reset UI
                     courseContentEditor.classList.add('hidden');
                     selectedCourseId = null;
@@ -647,7 +647,7 @@ function initializeAdminPageLogic(adminUser, adminUserData) {
                     content: []
                 };
                 sections.push(newSection);
-                
+
                 await update(courseRef, { sections: sections });
 
                 // Update local cache and re-render
@@ -664,6 +664,50 @@ function initializeAdminPageLogic(adminUser, adminUserData) {
 
     loadAllCoursesForAdmin();
     initializeAccordion();
+
+    const uploadJsonForm = document.getElementById('upload-json-form');
+    if (uploadJsonForm) {
+        uploadJsonForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const fileInput = document.getElementById('json-file-input');
+            const messageEl = document.getElementById('upload-json-message');
+            const file = fileInput.files[0];
+
+            if (!file) {
+                messageEl.textContent = 'Please select a file.';
+                messageEl.style.color = 'var(--mit-red)';
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = async (event) => {
+                try {
+                    const courseData = JSON.parse(event.target.result);
+                    await uploadCourseFromJson(courseData, adminUser.uid);
+                    messageEl.textContent = 'Course uploaded successfully!';
+                    messageEl.style.color = 'green';
+                    uploadJsonForm.reset();
+                    // Refresh the course list
+                    loadAllCoursesForAdmin();
+                } catch (error) {
+                    console.error("Error processing JSON file:", error);
+                    messageEl.textContent = `Error: ${error.message}`;
+                    messageEl.style.color = 'var(--mit-red)';
+                }
+            };
+            reader.readAsText(file);
+        });
+    }
+}
+
+async function uploadCourseFromJson(courseData, adminUserId) {
+    const newCourseRef = push(ref(db, 'courses'));
+    const newCourseData = {
+        ...courseData,
+        createdAt: Date.now(),
+        createdBy: adminUserId
+    };
+    await set(newCourseRef, newCourseData);
 }
 
 /**
@@ -722,7 +766,7 @@ function initializeLearningPage(user, userData) {
         sections.forEach(section => {
             const sectionWrapper = document.createElement('div');
             sectionWrapper.classList.add('course-section');
-            
+
             const sectionTitle = document.createElement('h2');
             sectionTitle.textContent = section.title;
             sectionWrapper.appendChild(sectionTitle);
@@ -739,7 +783,7 @@ function initializeLearningPage(user, userData) {
                 contentItems.forEach(item => {
                     const itemWrapper = document.createElement('div');
                     itemWrapper.classList.add('content-item');
-                    
+
                     let contentHtml = `<h4>${item.title}</h4>`;
                     switch (item.type) {
                         case 'module':
@@ -797,7 +841,7 @@ function initializeChatPage(currentUser) {
     const messageInput = document.getElementById('chat-message-input');
     const sendButton = document.getElementById('send-chat-message-btn');
     if (!messagesArea || !messageInput || !sendButton) { console.error("Chat UI elements not found."); return; }
-    messagesArea.innerHTML = ''; 
+    messagesArea.innerHTML = '';
     sendButton.addEventListener('click', async () => {
         const text = messageInput.value.trim();
         if (text === '') return;
@@ -805,7 +849,7 @@ function initializeChatPage(currentUser) {
         if (currentUser.displayName) {
             userDisplayName = currentUser.displayName;
         } else {
-            try { 
+            try {
                 const userSnap = await get(ref(db, `users/${currentUser.uid}/displayName`));
                 if (userSnap.exists()) userDisplayName = userSnap.val();
             } catch (e) { console.warn("Could not fetch display name for chat user", e); }
@@ -813,10 +857,10 @@ function initializeChatPage(currentUser) {
         const messageData = { userId: currentUser.uid, displayName: userDisplayName, text: text, timestamp: Date.now() };
         try {
             await push(ref(db, 'studentChatMessages'), messageData);
-            messageInput.value = ''; 
+            messageInput.value = '';
         } catch (error) { console.error("Error sending chat message:", error); alert("Could not send message."); }
     });
-    const chatMessagesQuery = query(ref(db, 'studentChatMessages'), orderByChild('timestamp'), limitToLast(100)); 
+    const chatMessagesQuery = query(ref(db, 'studentChatMessages'), orderByChild('timestamp'), limitToLast(100));
     onChildAdded(chatMessagesQuery, (snapshot) => {
         const message = snapshot.val();
         if (message) {
@@ -825,7 +869,7 @@ function initializeChatPage(currentUser) {
             const time = document.createElement('span'); time.classList.add('timestamp'); time.textContent = `(${new Date(message.timestamp).toLocaleTimeString()})`;
             messageDiv.appendChild(strong); messageDiv.appendChild(document.createTextNode(message.text)); messageDiv.appendChild(time);
             messagesArea.appendChild(messageDiv);
-            messagesArea.scrollTop = messagesArea.scrollHeight; 
+            messagesArea.scrollTop = messagesArea.scrollHeight;
         }
     });
 }
@@ -836,27 +880,27 @@ function initializeChatPage(currentUser) {
  * Loads user data from the database and updates the UI accordingly.
  * @param {User} user The user object from Firebase Auth.
  */
-function loadUserData(user) { 
-    console.log("--- loadUserData: CALLED for UID: " + user.uid + " (Full Functionality Enabled) ---"); 
-    console.log("loadUserData: User auth object passed:", JSON.stringify(user, null, 2)); 
-    
+function loadUserData(user) {
+    console.log("--- loadUserData: CALLED for UID: " + user.uid + " (Full Functionality Enabled) ---");
+    console.log("loadUserData: User auth object passed:", JSON.stringify(user, null, 2));
+
     const userDbRef = ref(db, 'users/' + user.uid);
-    console.log("loadUserData: ABOUT TO CALL get() for path: " + userDbRef.toString()); 
+    console.log("loadUserData: ABOUT TO CALL get() for path: " + userDbRef.toString());
 
     get(userDbRef).then((snapshot) => {
         console.log('loadUserData - Raw snapshot value for UID ' + user.uid + ':', snapshot.val());
-        const userData = snapshot.val(); 
-        const adminNavLink = document.getElementById('admin-nav-link'); 
+        const userData = snapshot.val();
+        const adminNavLink = document.getElementById('admin-nav-link');
         const studentChatNavLink = document.getElementById('student-chat-nav-link');
         const profileNavLink = document.getElementById('profile-nav-link');
 
         if(profileNavLink) profileNavLink.classList.remove('hidden');
-        if(studentChatNavLink) studentChatNavLink.classList.remove('hidden'); 
+        if(studentChatNavLink) studentChatNavLink.classList.remove('hidden');
 
-        if (userData) { 
-            console.log('loadUserData - userData object:', JSON.stringify(userData, null, 2)); 
-            const userNameEl = document.getElementById('user-name'); 
-            const userEmailEl = document.getElementById('user-email'); 
+        if (userData) {
+            console.log('loadUserData - userData object:', JSON.stringify(userData, null, 2));
+            const userNameEl = document.getElementById('user-name');
+            const userEmailEl = document.getElementById('user-email');
             if (userNameEl) userNameEl.textContent = userData.displayName || 'N/A';
             if (userEmailEl) userEmailEl.textContent = userData.email || 'N/A';
 
@@ -872,17 +916,17 @@ function loadUserData(user) {
                     adminNavLink.classList.add('hidden');
                 }
             }
-            
+
             const currentPage = window.location.pathname.split("/").pop();
             if (currentPage === 'admin.html') {
                 if (userData.role === 'admin' || userData.role === 'faculty') {
-                    initializeAdminPageLogic(user, userData); 
+                    initializeAdminPageLogic(user, userData);
                 } else {
                     console.warn("User is not admin/faculty. Redirecting from admin page attempt.");
-                    window.location.href = 'index.html'; 
+                    window.location.href = 'index.html';
                 }
             } else if (currentPage === 'course.html') {
-                loadCourseDetailsWithAccessCheck(user, userData); 
+                loadCourseDetailsWithAccessCheck(user, userData);
             } else if (currentPage === 'course-admin.html') {
                 if (auth.currentUser && auth.currentUser.email === 'chipimizere@gmail.com') {
                     initializeCourseAdminPage(user, userData);
@@ -892,11 +936,11 @@ function loadUserData(user) {
             } else if (currentPage === 'learning.html') {
                 initializeLearningPage(user, userData);
             } else if (currentPage === 'chat.html') {
-                initializeChatPage(user); 
+                initializeChatPage(user);
             }
 
             if (window.location.pathname.endsWith('profile.html')) {
-                const userRoleEl = document.getElementById('user-role'); 
+                const userRoleEl = document.getElementById('user-role');
                 if (userRoleEl) userRoleEl.textContent = userData.role || 'N/A';
                 const profilePicEl = document.getElementById('profile-picture');
                 if (profilePicEl) {
@@ -947,19 +991,19 @@ function loadUserData(user) {
             if (window.location.pathname.endsWith('dashboard.html')) {
                 const enrolledCoursesList = userData.enrolledCourses || [];
                 loadEnrolledCourses(user.uid, enrolledCoursesList, userData.progress || {});
-                loadAnnouncements(enrolledCoursesList); 
+                loadAnnouncements(enrolledCoursesList);
                 loadAcademicProgress(user.uid);
-                loadPlatformNews(); 
+                loadPlatformNews();
             }
             if ((window.location.pathname.endsWith('index.html') || window.location.pathname === '/') && auth.currentUser) {
                   loadAllCourses(user.uid); // This is the one we are watching
             }
 
-        } else { 
-            console.error('loadUserData - userData is null or undefined for UID:', user.uid, "(User record likely missing from Realtime Database)"); 
-            if (window.location.pathname.endsWith('profile.html')) clearProfilePageData(); 
+        } else {
+            console.error('loadUserData - userData is null or undefined for UID:', user.uid, "(User record likely missing from Realtime Database)");
+            if (window.location.pathname.endsWith('profile.html')) clearProfilePageData();
             if (adminNavLink) adminNavLink.classList.add('hidden');
-            
+
             const currentPage = window.location.pathname.split("/").pop();
             if(currentPage === 'admin.html'){ // Redirect from admin if no userData to confirm role
                 console.warn("User authenticated but no database record; cannot verify admin role. Redirecting from admin page.");
@@ -968,13 +1012,13 @@ function loadUserData(user) {
                 console.warn("User authenticated but no database record for " + currentPage + ". Page might appear empty or with default values.");
             }
         }
-    }).catch((error) => { 
-        console.error('loadUserData - Firebase get() FAILED for UID:', user.uid, error); 
+    }).catch((error) => {
+        console.error('loadUserData - Firebase get() FAILED for UID:', user.uid, error);
         if (window.location.pathname.endsWith('profile.html')) clearProfilePageData();
         const adminNavLink = document.getElementById('admin-nav-link');
         if (adminNavLink) adminNavLink.classList.add('hidden');
         const studentChatNavLink = document.getElementById('student-chat-nav-link');
-        if(studentChatNavLink) studentChatNavLink.classList.add('hidden'); 
+        if(studentChatNavLink) studentChatNavLink.classList.add('hidden');
         const profileNavLink = document.getElementById('profile-nav-link');
         if(profileNavLink) profileNavLink.classList.add('hidden');
     });
@@ -986,7 +1030,7 @@ function loadUserData(user) {
  * Loads the academic progress for a user and displays it on the dashboard.
  * @param {string} userId The ID of the user.
  */
-async function loadAcademicProgress(userId) { 
+async function loadAcademicProgress(userId) {
     const coursesInProgressEl = document.getElementById('courses-in-progress');
     const assignmentsDueEl = document.getElementById('assignments-due');
     const upcomingExamsEl = document.getElementById('upcoming-exams');
@@ -1020,23 +1064,23 @@ async function loadAcademicProgress(userId) {
  * Loads all available courses and displays them on the home page.
  * @param {string} currentUserId The ID of the current user.
  */
-async function loadAllCourses(currentUserId) { 
+async function loadAllCourses(currentUserId) {
     const coursesDbRef = ref(db, 'courses');
     const coursesContainer = document.getElementById('courses-container');
     if (!coursesContainer && (window.location.pathname.endsWith('index.html') || window.location.pathname.endsWith('/'))) {
         console.warn("loadAllCourses: coursesContainer not found on index/home page.");
         return;
     }
-    if (!coursesContainer) return; 
+    if (!coursesContainer) return;
 
     try {
         const coursesSnapshot = await get(coursesDbRef);
-        coursesContainer.innerHTML = ''; 
+        coursesContainer.innerHTML = '';
         const courses = coursesSnapshot.val();
         if (courses) {
             const userEnrolledCoursesRef = ref(db, 'users/' + currentUserId + '/enrolledCourses');
             const enrolledSnapshot = await get(userEnrolledCoursesRef);
-            const enrolledCourseObjects = enrolledSnapshot.val() || []; 
+            const enrolledCourseObjects = enrolledSnapshot.val() || [];
             for (const courseId in courses) {
                 const course = courses[courseId];
                 const isEnrolled = enrolledCourseObjects.some(ec => ec.courseId === courseId);
@@ -1051,7 +1095,7 @@ async function loadAllCourses(currentUserId) {
                 } else {
                     buttonHtml = `<button class="btn enroll-btn" data-course-id="${courseId}">Enroll</button>`;
                 }
-                
+
                 const courseRow = document.createElement('tr');
                 courseRow.innerHTML = `
                     <td>${course.title}</td>
@@ -1080,7 +1124,7 @@ async function loadAllCourses(currentUserId) {
  * @param {string} courseId The ID of the course.
  * @param {HTMLButtonElement} button The button element that was clicked.
  */
-async function enrollInCourse(userId, courseId, button) { 
+async function enrollInCourse(userId, courseId, button) {
     const userCoursesDbRef = ref(db, 'users/' + userId + '/enrolledCourses');
     try {
         const snapshot = await get(userCoursesDbRef);
@@ -1092,7 +1136,7 @@ async function enrollInCourse(userId, courseId, button) {
             const course = courseSnapshot.val();
             if (!course) { alert("Error: Course details not found."); return; }
             const enrollmentData = {
-                courseId: courseId, enrollmentDate: Date.now(), title: course.title || "Untitled Course", 
+                courseId: courseId, enrollmentDate: Date.now(), title: course.title || "Untitled Course",
                 currentStatus: 'pending_approval', lastAccessed: Date.now()
             };
             enrolledCoursesArray.push(enrollmentData);
@@ -1118,24 +1162,24 @@ async function enrollInCourse(userId, courseId, button) {
  * @param {Array} enrolledCoursesData An array of the user's enrolled courses.
  * @param {object} userProgress The user's progress data.
  */
-async function loadEnrolledCourses(userId, enrolledCoursesData, userProgress) { 
+async function loadEnrolledCourses(userId, enrolledCoursesData, userProgress) {
     const enrolledCoursesList = document.getElementById('enrolled-courses-list');
     if (!enrolledCoursesList) return;
-    enrolledCoursesList.innerHTML = ''; 
+    enrolledCoursesList.innerHTML = '';
     if (!enrolledCoursesData || enrolledCoursesData.length === 0) {
         enrolledCoursesList.innerHTML = '<p>You are not enrolled in any courses yet. <a href="index.html">Browse courses</a>.</p>';
         return;
     }
     for (const enrollment of enrolledCoursesData) {
-        const courseId = enrollment.courseId; 
-        if (!courseId) continue; 
+        const courseId = enrollment.courseId;
+        if (!courseId) continue;
         try {
             const courseSnapshot = await get(ref(db, 'courses/' + courseId));
             const course = courseSnapshot.val();
             if (course) {
                 const courseProg = userProgress[courseId] || { completedModules: [], totalModules: course.modules?.length || 0 };
                 const completedCount = courseProg.completedModules?.length || 0;
-                const totalModules = courseProg.totalModules || (course.modules?.length || 0); 
+                const totalModules = courseProg.totalModules || (course.modules?.length || 0);
                 const progressPercent = totalModules > 0 ? (completedCount / totalModules) * 100 : 0;
                 let statusHtml = '';
                 let btnHtml = '';
@@ -1154,11 +1198,11 @@ async function loadEnrolledCourses(userId, enrolledCoursesData, userProgress) {
                 const card = document.createElement('div');
                 card.classList.add('course-card');
                 card.innerHTML = `
-                    <h3>${enrollment.title || course.title}</h3> 
-                    ${statusHtml} 
+                    <h3>${enrollment.title || course.title}</h3>
+                    ${statusHtml}
                     <p>${course.description?.substring(0,100) + '...' || 'No description.'}</p>
                     <div class="progress-bar-container"><div class="progress-bar" style="width: ${progressPercent.toFixed(0)}%;">${progressPercent.toFixed(0)}%</div></div>
-                    <p>Progress: ${completedCount} / ${totalModules} items completed</p> 
+                    <p>Progress: ${completedCount} / ${totalModules} items completed</p>
                     ${btnHtml}`;
                 enrolledCoursesList.appendChild(card);
             }
@@ -1170,17 +1214,17 @@ async function loadEnrolledCourses(userId, enrolledCoursesData, userProgress) {
  * Loads announcements for the courses a user is enrolled in.
  * @param {Array} enrolledCoursesData An array of the user's enrolled courses.
  */
-function loadAnnouncements(enrolledCoursesData) { 
+function loadAnnouncements(enrolledCoursesData) {
     const announcementsList = document.getElementById('announcements-list');
     if (!announcementsList) return;
-    announcementsList.innerHTML = ''; 
+    announcementsList.innerHTML = '';
     if (!enrolledCoursesData || enrolledCoursesData.length === 0) {
         announcementsList.innerHTML = '<li>No announcements for your courses.</li>'; return;
     }
     const enrolledCourseIds = enrolledCoursesData.map(e => e.courseId);
     const announcementsDbRef = query(ref(db, 'announcements'), orderByChild('timestamp'));
-    onValue(announcementsDbRef, (snapshot) => { 
-        announcementsList.innerHTML = ''; 
+    onValue(announcementsDbRef, (snapshot) => {
+        announcementsList.innerHTML = '';
         let found = false;
         if (snapshot.exists()) {
             const all = []; snapshot.forEach(s => all.push({id:s.key, ...s.val()}));
@@ -1203,7 +1247,7 @@ function loadAnnouncements(enrolledCoursesData) {
  * @param {User} currentUser The current user object from Firebase Auth.
  * @param {object} currentUserData The current user's data from the database.
  */
-async function loadCourseDetailsWithAccessCheck(currentUser, currentUserData) { 
+async function loadCourseDetailsWithAccessCheck(currentUser, currentUserData) {
     console.log("loadCourseDetailsWithAccessCheck: CALLED");
     const courseId = new URLSearchParams(window.location.search).get('id');
     const courseDetailContent = document.getElementById('course-detail-content');
@@ -1225,7 +1269,7 @@ async function loadCourseDetailsWithAccessCheck(currentUser, currentUserData) {
         const course = courseSnapshot.val();
         const userProgressSnapshot = await get(ref(db, `users/${currentUser.uid}/progress/${courseId}`));
         const userProg = userProgressSnapshot.val() || { completedModules: [] };
-        
+
         if (course) {
             let termName = "N/A";
             if (course.academicTermId) {
@@ -1264,7 +1308,7 @@ async function loadCourseDetailsWithAccessCheck(currentUser, currentUserData) {
                     <div id="assignments-list"><h3>Assignments</h3><p>Loading...</p></div>
                 </div>
                 <button id="upload-assignment-btn" class="btn">Upload Assignment (Simulated)</button>`;
-            
+
             document.querySelectorAll('.mark-complete-btn').forEach(button => {
                 button.addEventListener('click', () => markModuleComplete(currentUser.uid, courseId, button.dataset.moduleId, button));
             });
@@ -1279,7 +1323,7 @@ async function loadCourseDetailsWithAccessCheck(currentUser, currentUserData) {
  * @param {string} courseId The ID of the course.
  * @param {string} userId The ID of the user.
  */
-async function loadCourseAssessments(courseId, userId) { 
+async function loadCourseAssessments(courseId, userId) {
     const examsListEl = document.getElementById('exams-list');
     const assignmentsListEl = document.getElementById('assignments-list');
     if (!examsListEl || !assignmentsListEl) { console.warn("Assessment elements missing."); return; }
@@ -1292,7 +1336,7 @@ async function loadCourseAssessments(courseId, userId) {
             item.innerHTML = `<h4>${ex.title}</h4><p><strong>Date:</strong> ${new Date(ex.date).toLocaleDateString()}</p><p><strong>Duration:</strong> ${ex.duration} mins</p><p><strong>Weight:</strong> ${ex.weight}%</p><button class="btn exam-btn" data-exam-id="${id}">Details</button>`;
             examsListEl.appendChild(item);
         }); else examsListEl.innerHTML += '<p>No exams scheduled for this course yet.</p>';
-        
+
         const assignSnap = await get(ref(db, `courses/${courseId}/assignments`));
         const assigns = assignSnap.val();
         assignmentsListEl.innerHTML = '<h3>Assignments</h3>';
@@ -1311,16 +1355,16 @@ async function loadCourseAssessments(courseId, userId) {
  * @param {string} moduleId The ID of the module.
  * @param {HTMLButtonElement} button The button element that was clicked.
  */
-async function markModuleComplete(userId, courseId, moduleId, button) { 
+async function markModuleComplete(userId, courseId, moduleId, button) {
     const progRef = ref(db, `users/${userId}/progress/${courseId}/completedModules`);
     try {
         const snap = await get(progRef); let completed = snap.val() || [];
-        if (!Array.isArray(completed)) completed = []; 
+        if (!Array.isArray(completed)) completed = [];
         if (!completed.includes(moduleId)) {
             completed.push(moduleId); await set(progRef, completed);
-            if (button) { button.textContent = 'Completed'; button.disabled = true; 
+            if (button) { button.textContent = 'Completed'; button.disabled = true;
                           const statusEl = button.closest('li').querySelector('.module-status');
-                          if(statusEl) statusEl.textContent = 'Completed'; 
+                          if(statusEl) statusEl.textContent = 'Completed';
                         }
             // Potentially update dashboard if on course page and then navigating back,
             // but direct refresh of dashboard data is better handled by its own load function.
@@ -1333,7 +1377,7 @@ async function markModuleComplete(userId, courseId, moduleId, button) {
  * @param {string} userId The ID of the user.
  * @param {string} courseIdToApprove The ID of the course to approve.
  */
-async function approveCourseEnrollment(userId, courseIdToApprove) { 
+async function approveCourseEnrollment(userId, courseIdToApprove) {
     const userEnrollmentsRef = ref(db, `users/${userId}/enrolledCourses`);
     try {
         const snapshot = await get(userEnrollmentsRef);
@@ -1342,7 +1386,7 @@ async function approveCourseEnrollment(userId, courseIdToApprove) {
         const courseIndex = enrolledCourses.findIndex(ec => ec.courseId === courseIdToApprove && ec.currentStatus === 'pending_approval');
         if (courseIndex > -1) {
             enrolledCourses[courseIndex].currentStatus = 'active';
-            enrolledCourses[courseIndex].lastAccessed = Date.now(); 
+            enrolledCourses[courseIndex].lastAccessed = Date.now();
             await set(userEnrollmentsRef, enrolledCourses);
             alert(`Enrollment for ${enrolledCourses[courseIndex].title || courseIdToApprove} approved.`);
         } else { alert(`Could not find pending enrollment for ${courseIdToApprove}.`); }
@@ -1352,16 +1396,16 @@ async function approveCourseEnrollment(userId, courseIdToApprove) {
 /**
  * Loads platform news and announcements.
  */
-async function loadPlatformNews() { 
+async function loadPlatformNews() {
     const el = document.getElementById('platform-news-list'); if (!el) return;
     el.innerHTML = '<li>Loading...</li>';
     try {
         const newsQuery = query(ref(db, 'platformAnnouncements'), orderByChild('timestamp'), limitToLast(10));
-        onValue(newsQuery, (snap) => { 
-            el.innerHTML = ''; 
+        onValue(newsQuery, (snap) => {
+            el.innerHTML = '';
             if (snap.exists()) {
                 const items = []; snap.forEach(s => items.push({ id:s.key, ...s.val() }));
-                items.reverse().forEach(item => { 
+                items.reverse().forEach(item => {
                     const li = document.createElement('li');
                     li.innerHTML = `<strong>${item.authorName || 'Admin'}</strong> (${new Date(item.timestamp).toLocaleString()}):<br>${item.message.replace(/\n/g, '<br>')}`;
                     el.appendChild(li);
@@ -1374,15 +1418,15 @@ async function loadPlatformNews() {
 /**
  * Ensures that sample data is populated in the database if it's empty.
  */
-async function ensureSampleDataIsPopulated() { 
+async function ensureSampleDataIsPopulated() {
     try {
         const coursesSnapshot = await get(ref(db, 'courses'));
-        const termsSnapshot = await get(ref(db, 'academicTerms')); 
+        const termsSnapshot = await get(ref(db, 'academicTerms'));
         const announcementsSnapshot = await get(ref(db, 'announcements'));
         let populatedSomething = false;
         if (!coursesSnapshot.exists() || !Object.keys(coursesSnapshot.val() || {}).length) {
             console.info("No existing course data. Populating sample courses...");
-            await addSampleCourses(); 
+            await addSampleCourses();
             populatedSomething = true;
         }
         if (!announcementsSnapshot.exists() || !Object.keys(announcementsSnapshot.val() || {}).length) {
@@ -1432,12 +1476,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Get DOM elements
     loginForm = document.getElementById('login-form');
     signupForm = document.getElementById('signup-form');
-    logoutButton = document.getElementById('logout-button'); 
-    loginLogoutNav = document.getElementById('login-logout'); 
+    logoutButton = document.getElementById('logout-button');
+    loginLogoutNav = document.getElementById('login-logout');
     authSection = document.getElementById('auth-section');
     authError = document.getElementById('auth-error');
     welcomeMessage = document.getElementById('welcome-message');
-    mainContentPages = { 
+    mainContentPages = {
         home: document.getElementById('home-page'),
         dashboard: document.getElementById('dashboard-page'),
         courseDetail: document.getElementById('course-detail-page'), // Corresponds to course.html
@@ -1445,19 +1489,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         admin: document.getElementById('admin-page'),
         chat: document.querySelector('.chat-container') // Corresponds to chat.html
     };
-    
+
     // Check if Firebase services are available
-    if (!auth || !db) { 
+    if (!auth || !db) {
         console.error("Firebase auth or db service not available on DOMContentLoaded. Check firebase-config.js.");
-        return; 
+        return;
     }
-    storage = getStorage(auth.app); 
+    storage = getStorage(auth.app);
 
     // Signup form event listener
-    if (signupForm) { 
+    if (signupForm) {
         signupForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            if(authError) authError.textContent = ''; 
+            if(authError) authError.textContent = '';
             const name = document.getElementById('signup-name').value;
             const email = document.getElementById('signup-email').value;
             const password = document.getElementById('signup-password').value;
@@ -1496,7 +1540,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     emergencyContact: { name: emergencyName, relationship: emergencyRelationship, phone: emergencyPhone },
                     termsAccepted: termsAccepted, createdAt: Date.now(),
                     feesBalance: { amount: 27500, currency: "MWK" },
-                    enrolledCourses: [], progress: {} 
+                    enrolledCourses: [], progress: {}
                 };
                 const userDbRef = ref(db, 'users/' + user.uid);
                 try {
@@ -1507,7 +1551,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     console.error('FATAL: Failed to save user data to Realtime Database for UID:', user.uid, dbSetError);
                     if(authError) authError.textContent = `Signup successful, but failed to save profile data: ${dbSetError.message}.`;
                 }
-            } catch (error) { 
+            } catch (error) {
                 console.error('Signup process error (Auth or File Upload):', error);
                 if(authError) authError.textContent = `Signup Error: ${error.message}`;
             }
@@ -1515,47 +1559,47 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // Login form event listener
-    if (loginForm) { 
-        console.log("Login form event listener ATTACHMENT attempted."); 
+    if (loginForm) {
+        console.log("Login form event listener ATTACHMENT attempted.");
         loginForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            console.log("Login form SUBMITTED by user."); 
+            console.log("Login form SUBMITTED by user.");
             const email = document.getElementById('login-email').value;
             const password = document.getElementById('login-password').value;
-            console.log("Attempting Firebase login for email:", email); 
+            console.log("Attempting Firebase login for email:", email);
             signInWithEmailAndPassword(auth, email, password)
-                .then(userCredential => { 
-                    console.log('Firebase signInWithEmailAndPassword successful for UID:', userCredential.user.uid); 
-                    loginForm.reset(); 
-                    if(authError) authError.textContent = ''; 
+                .then(userCredential => {
+                    console.log('Firebase signInWithEmailAndPassword successful for UID:', userCredential.user.uid);
+                    loginForm.reset();
+                    if(authError) authError.textContent = '';
                 })
-                .catch(error => { 
-                    console.error('Firebase signInWithEmailAndPassword FAILED:', error); 
-                    if(authError) authError.textContent = `Login Error: ${error.message}`; 
+                .catch(error => {
+                    console.error('Firebase signInWithEmailAndPassword FAILED:', error);
+                    if(authError) authError.textContent = `Login Error: ${error.message}`;
                 });
         });
     }
 
     // Logout button event listener
-    if (logoutButton) { 
-        console.log("Attaching logout listener to profile page button"); 
+    if (logoutButton) {
+        console.log("Attaching logout listener to profile page button");
         logoutButton.addEventListener('click', handleLogout);
     }
-    
+
     // Firebase auth state change listener
     onAuthStateChanged(auth, (user) => {
         console.log("onAuthStateChanged: Event FIRED. User object:", user);
         if (user) {
             console.log("onAuthStateChanged: User IS logged in. UID:", user.uid);
             updateUIForLoggedInUser(user);
-            loadUserData(user); 
+            loadUserData(user);
         } else {
             console.log("onAuthStateChanged: User is NOT logged in.");
             updateUIForLoggedOutUser();
         }
     });
-    
+
     // Ensure sample data exists on initial load
-    await ensureSampleDataIsPopulated(); 
-    console.log("DOMContentLoaded: END"); 
+    await ensureSampleDataIsPopulated();
+    console.log("DOMContentLoaded: END");
 });
